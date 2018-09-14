@@ -7,18 +7,13 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-
+import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
 
 import static cl.bice.auth.config.Constantes.LOGIN_URL;
 
 
 @Configuration
-@EnableGlobalMethodSecurity(
-		  prePostEnabled = true, 
-		  securedEnabled = true, 
-		  jsr250Enabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	
 
@@ -45,8 +40,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 				.url("ldap://localhost:8389/dc=springframework,dc=org")
 				.and()
 			.passwordCompare()
-				.passwordEncoder(new BCryptPasswordEncoder())
-				.passwordAttribute("userPassword");	  
+				.passwordEncoder(new LdapShaPasswordEncoder())
+				.passwordAttribute("userPassword");  
 	}
 	
 	
