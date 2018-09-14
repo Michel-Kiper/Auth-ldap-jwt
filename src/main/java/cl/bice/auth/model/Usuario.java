@@ -9,8 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Usuario {
-	
-	private String username;
-	private String password;
-	private String group;
+	String username;
+	String password;
 }

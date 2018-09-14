@@ -1,8 +1,7 @@
 package cl.bice.auth.config;
 
 import java.io.IOException;
-import java.util.ArrayList;
-
+import java.util.List;
 
 import static cl.bice.auth.config.Constantes.HEADER_AUTHORIZACION_KEY;
 import static cl.bice.auth.config.Constantes.SUPER_SECRET_KEY;
@@ -15,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -42,18 +43,28 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter{
 	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
 		String token = request.getHeader(HEADER_AUTHORIZACION_KEY);
 		if (token != null) {
-			// Se procesa el token y se recupera el usuario.
-			String user = Jwts.parser()
-						.setSigningKey(SUPER_SECRET_KEY)
-						.parseClaimsJws(token.replace(TOKEN_BEARER_PREFIX, ""))
-						.getBody()
-						.getSubject();
-
-			if (user != null) {
-				return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+			
+			 String usuario =   Jwts.parser()
+								.setSigningKey(SUPER_SECRET_KEY)
+								.parseClaimsJws(token.replace(TOKEN_BEARER_PREFIX, ""))
+								.getBody()
+								.getSubject();
+			 
+		     String roles =    (String) Jwts.parser()
+							   .setSigningKey(SUPER_SECRET_KEY)
+							   .parseClaimsJws(token.replace(TOKEN_BEARER_PREFIX, ""))
+							   .getBody()
+							   .get("roles");
+				  
+			 List<GrantedAuthority> permisosRoles = AuthorityUtils.commaSeparatedStringToAuthorityList(formatoRolesLdap(roles));
+			if (usuario != null) {
+				return new UsernamePasswordAuthenticationToken(usuario, null, permisosRoles);
 			}
-			return null;
 		}
 		return null;
+	}
+	
+	public String formatoRolesLdap(String roles) {
+		return roles.replace("[", "").replaceAll("]","");
 	}
 }
